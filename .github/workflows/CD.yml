@@ -6,93 +6,43 @@ on:
     - 'v*'
 
 jobs:
-  macos-amd64:
-    runs-on: macOS-10.15
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+          - { target: x86_64-unknown-linux-musl, exe: linux-amd64, os: ubuntu-latest, test: true }
+          - { target: aarch64-unknown-linux-musl, exe: linux-aarch64, os: ubuntu-latest, test: true }
+          - { target: x86_64-apple-darwin, exe: macos-amd64, os: macos-latest, test: true }
+          - { target: aarch64-apple-darwin, exe: macos-aarch64, os: macos-latest, test: false } # run aarch64 binary is not supported
+    runs-on: ${{ matrix.job.os }}
     steps:
-    - uses: actions/checkout@v1
-    - run: cargo build --release --verbose
-    - run: cd target/release && tar -cvf unison-fsmonitor-macos-amd64.tar.gz unison-fsmonitor
-    - uses: actions/create-release@v1
-      id: create_release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-    - uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./target/release/unison-fsmonitor-macos-amd64.tar.gz
-        asset_name: unison-fsmonitor.tar.gz
-        asset_content_type: application/gzip
-
-  macos-aarch64:
-    runs-on: macOS-10.15
-    steps:
-    - uses: actions/checkout@v1
-    - run: cargo build --release --verbose
-    - run: cd target/release && tar -cvf unison-fsmonitor-macos-aarch64.tar.gz unison-fsmonitor
-    - uses: actions/create-release@v1
-      id: create_release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        target: aarch64-apple-darwin
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-    - uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./target/release/unison-fsmonitor-macos-aarch64.tar.gz
-        asset_name: unison-fsmonitor.tar.gz
-        asset_content_type: application/gzip
-        
-  linux-amd64:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - run: cargo build --release --verbose
-    - run: cd target/release && tar -cvf unison-fsmonitor-linux-amd64.tar.gz unison-fsmonitor
-    - uses: actions/create-release@v1
-      id: create_release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        target: x86_64-unknown-linux-musl
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-    - uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./target/release/unison-fsmonitor-linux-amd64.tar.gz
-        asset_name: unison-fsmonitor.tar.gz
-        asset_content_type: application/gzip
-        
-  linux-aarch64:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - run: cargo build --release --verbose
-    - run: cd target/release && tar -cvf unison-fsmonitor-linux-aarch64.tar.gz unison-fsmonitor
-    - uses: actions/create-release@v1
-      id: create_release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        target: arm-unknown-linux-gnueabi
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-    - uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./target/release/unison-fsmonitor-linux-aarch64.tar.gz
-        asset_name: unison-fsmonitor.tar.gz
-        asset_content_type: application/gzip
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          target: ${{ matrix.job.target }}
+          components: rust-src # necessary for wasi, because there isn't a cross image for it
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          args: --verbose --target=${{ matrix.job.target }} --locked
+          command: build
+      - run: cd target/release && tar -cvf unison-fsmonitor-${{ matrix.job.exe }}.tar.gz unison-fsmonitor
+      - uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/release/unison-fsmonitor-${{ matrix.job.exe }}.tar.gz
+          asset_name: unison-fsmonitor.tar.gz
+          asset_content_type: application/gzip      
