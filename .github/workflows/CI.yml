@@ -8,10 +8,10 @@ jobs:
       fail-fast: false
       matrix:
         job:
-          - { target: x86_64-unknown-linux-musl, exe: amd64-linux, os: ubuntu-latest, test: true }
-          - { target: aarch64-unknown-linux-musl, exe: aarch64-linux, os: ubuntu-latest, test: true }
-          - { target: x86_64-apple-darwin, exe: macos, os: macos-latest, test: true }
-          - { target: aarch64-apple-darwin, exe: macos, os: macos-latest, test: false } # run aarch64 binary is not supported
+          - { target: x86_64-unknown-linux-musl, exe: linux-amd64, os: ubuntu-latest, test: true }
+          - { target: aarch64-unknown-linux-musl, exe: linux-aarch64, os: ubuntu-latest, test: true }
+          - { target: x86_64-apple-darwin, exe: macos-amd64, os: macos-latest, test: true }
+          - { target: aarch64-apple-darwin, exe: macos-aarch64, os: macos-latest, test: false } # run aarch64 binary is not supported
     runs-on: ${{ matrix.job.os }}
     steps:
       - uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
           args: --verbose --target=${{ matrix.job.target }} --locked
           command: build
       - uses: actions-rs/cargo@v1
-        if: ${{ matrix.job.test }} == true
+        if: ${{ matrix.job.test == true }}
         with:
           use-cross: true
           args: --verbose --target=${{ matrix.job.target }} --locked
