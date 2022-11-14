@@ -4,16 +4,20 @@ on: [push, pull_request]
 
 jobs:
   macos-amd64:
-    runs-on: macOS-10.15
+    runs-on: macOS-11
     steps:
     - uses: actions/checkout@v1
+    - uses: uraimo/run-on-arch-action@v2
+      with:
+        target: amd64-apple-darwin
     - run: cargo build --verbose
     - run: cargo test --verbose
 
   macos-aarch64:
-    runs-on: macOS-10.15
+    runs-on: macOS-11
     steps:
     - uses: actions/checkout@v1
+    - uses: uraimo/run-on-arch-action@v2
       with:
         target: aarch64-apple-darwin
     - run: cargo build --verbose
@@ -23,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - uses: uraimo/run-on-arch-action@v2
       with:
         target: x86_64-unknown-linux-musl
     - run: cargo build --verbose
@@ -33,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - uses: uraimo/run-on-arch-action@v2
       with:
         target: arm-unknown-linux-gnueabi
     - run: cargo build --verbose
