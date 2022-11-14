@@ -16,7 +16,8 @@ jobs:
     steps:
       - name: "Checkout the code"
         uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - name: "Setup Rust toolchain"
+        uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
