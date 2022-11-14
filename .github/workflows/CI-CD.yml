@@ -1,4 +1,4 @@
-name: CI
+name: Build, test and release
 
 on: [push, pull_request]
 
@@ -50,6 +50,8 @@ jobs:
           use-cross: true
           args: --verbose --target=${{ matrix.job.target }} --locked
           command: test
+      - name: "Show folder content"
+        run: ls -R
       - name: "Prepare the artifacts"
         run: cd target/release && tar -cvf unison-fsmonitor-${{ matrix.job.exe }}.tar.gz unison-fsmonitor
       - name: "Upload the artifacts"
