@@ -6,7 +6,7 @@ jobs:
   macos:
     runs-on: macos-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         channel: [stable]
         target:
@@ -41,7 +41,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         channel: [stable]
         target:
