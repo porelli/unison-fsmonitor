@@ -24,36 +24,51 @@ jobs:
           profile: minimal
           target: ${{ matrix.target }}
       - run: ci/set_rust_version.bash ${{ matrix.channel }} ${{ matrix.target }}
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --target --verbose ${{ matrix.target }}
+          use-cross: false
+        
       - name: Test
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --target ${{ matrix.target }}
+          args: --target --verbose ${{ matrix.target }}
           use-cross: false
         
-  linux-amd64:
+  linux:
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - uses: uraimo/run-on-arch-action@v2
-      id: runandtest-x86_64-unknown-linux-musl
-      with:
-        arch: aarch64
-        distro: ubuntu18.04
-        run: |
-          cargo build --verbose
-          cargo test --verbose
+    strategy:
+      fail-fast: true
+      matrix:
+        channel: [stable]
+        target:
+          - x86_64-unknown-linux-musl
+          - arm-unknown-linux-gnueabi
 
-        
-  linux-aarch64:
-    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: uraimo/run-on-arch-action@v2
-      id: runandtest-arm-unknown-linux-gnueabi
-      with:
-        arch: aarch64
-        distro: ubuntu18.04
-        run: |
-          cargo build --verbose
-          cargo test --verbose
+      - name: Setup | Checkout
+        uses: actions/checkout@v2
+      - name: Setup | Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          profile: minimal
+          target: ${{ matrix.target }}
+      - run: ci/set_rust_version.bash ${{ matrix.channel }} ${{ matrix.target }}
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --target --verbose ${{ matrix.target }}
+          use-cross: false
+        
+      - name: Test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --target --verbose ${{ matrix.target }}
+          use-cross: false
