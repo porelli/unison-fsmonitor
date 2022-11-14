@@ -17,7 +17,7 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-      - name: Output Release URL File
+      - name: Output release URL file
         run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
       - name: Save Release URL File for publish
         uses: actions/upload-artifact@v1
