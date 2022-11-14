@@ -3,9 +3,37 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  build-and-test:
+  macos-amd64:
     runs-on: macOS-10.15
     steps:
     - uses: actions/checkout@v1
+    - run: cargo build --verbose
+    - run: cargo test --verbose
+
+  macos-aarch64:
+    runs-on: macOS-10.15
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        target: aarch64-apple-darwin
+    - run: cargo build --verbose
+    - run: cargo test --verbose
+        
+  linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        target: x86_64-unknown-linux-musl
+    - run: cargo build --verbose
+    - run: cargo test --verbose
+
+        
+  linux-aarch64:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        target: arm-unknown-linux-gnueabi
     - run: cargo build --verbose
     - run: cargo test --verbose
