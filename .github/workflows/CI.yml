@@ -28,14 +28,14 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --target --verbose ${{ matrix.target }}
+          args: --verbose --target ${{ matrix.target }}
           use-cross: false
         
       - name: Test
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --target --verbose ${{ matrix.target }}
+          args: --verbose --target ${{ matrix.target }}
           use-cross: false
         
   linux:
@@ -63,12 +63,12 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --target --verbose ${{ matrix.target }}
+          args: --verbose --target ${{ matrix.target }}
           use-cross: false
         
       - name: Test
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --target --verbose ${{ matrix.target }}
+          args: --verbose --target ${{ matrix.target }}
           use-cross: false
