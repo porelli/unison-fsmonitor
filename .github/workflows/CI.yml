@@ -2,31 +2,34 @@ name: CI
 
 on: [push, pull_request]
 
-jobs:
-  macos-amd64:
-    runs-on: macOS-11
-    steps:
-    - uses: actions/checkout@v1
-    - uses: uraimo/run-on-arch-action@v2
-      name: build-and-test
-      id: runandtest-amd64-apple-darwin
-      with:
-        target: amd64-apple-darwin
-        run: |
-          cargo build --verbose
-          cargo test --verbose
+jobs:     
+  macos:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        channel: [stable]
+        target:
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
 
-  macos-aarch64:
-    runs-on: macOS-11
     steps:
-    - uses: actions/checkout@v1
-    - uses: uraimo/run-on-arch-action@v2
-      id: runandtest-aarch64-apple-darwin
-      with:
-        target: aarch64-apple-darwin
-        run: |
-          cargo build --verbose
-          cargo test --verbose
+      - name: Setup | Checkout
+        uses: actions/checkout@v2
+      - name: Setup | Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          profile: minimal
+          target: ${{ matrix.target }}
+      - run: ci/set_rust_version.bash ${{ matrix.channel }} ${{ matrix.target }}
+      - name: Test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --target ${{ matrix.target }}
+          use-cross: false
         
   linux-amd64:
     runs-on: ubuntu-latest
@@ -35,7 +38,8 @@ jobs:
     - uses: uraimo/run-on-arch-action@v2
       id: runandtest-x86_64-unknown-linux-musl
       with:
-        target: x86_64-unknown-linux-musl
+        arch: aarch64
+        distro: ubuntu18.04
         run: |
           cargo build --verbose
           cargo test --verbose
@@ -48,7 +52,8 @@ jobs:
     - uses: uraimo/run-on-arch-action@v2
       id: runandtest-arm-unknown-linux-gnueabi
       with:
-        target: arm-unknown-linux-gnueabi
+        arch: aarch64
+        distro: ubuntu18.04
         run: |
           cargo build --verbose
           cargo test --verbose
