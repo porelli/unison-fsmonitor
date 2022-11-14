@@ -27,9 +27,9 @@ jobs:
           use-cross: true
           args: --verbose --target=${{ matrix.job.target }} --locked
           command: build
-      if: ${{ matrix.job.test }} == true
-        - uses: actions-rs/cargo@v1
-          with:
-            use-cross: true
-            args: --verbose --target=${{ matrix.job.target }} --locked
-            command: test
+      - uses: actions-rs/cargo@v1
+        if: ${{ matrix.job.test }} == true
+        with:
+          use-cross: true
+          args: --verbose --target=${{ matrix.job.target }} --locked
+          command: test
